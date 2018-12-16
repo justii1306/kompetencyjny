@@ -1,91 +1,113 @@
+
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
+import java.util.NoSuchElementException;
 
 public class Sort {
 
-    private final int noErasmus;
-    private final int maxErasmus;
-    private final LinkedList<Erasmus> erasmus;
+    //private final int noErasmus;
+    //private final int maxErasmus;
+    private LinkedList<Erasmus> erasmus;
     private LinkedList<Erasmus> erasmusToDivide;
+    private LinkedList<Erasmus> erasmusLeft;
     private LinkedList<Mentor> mentors;
-    private HashMap<Mentor, LinkedList<Erasmus>> wynik = new HashMap<>();
+    private LinkedList<Mentor> mentorsToDivade;
+    private HashMap<Mentor, LinkedList<Erasmus>> wynik;
 
     public Sort(int noErasmus, int maxErasmus, LinkedList erasmus, LinkedList mentors) {
-        this.noErasmus = noErasmus;
-        this.maxErasmus = maxErasmus;
         this.erasmus = erasmus;
-        this.erasmusToDivide = erasmus;
         this.mentors = mentors;
-
-        if (maxErasmus >= noErasmus){
-            this.wynik = Divide();
-            System.out.println();
+        this.erasmusToDivide = new LinkedList<>();
+        this.mentorsToDivade = new LinkedList<>();
+        this.wynik = new HashMap<>();
+        HashMap<Mentor, LinkedList<Erasmus>> tempWynik;
+        while (getErasmus().size() > 0) {
+            getErasmusToDivide().add(getErasmus().removeFirst());
+            String language = getErasmusToDivide().getFirst().getNativeLanguage();
+            int erasmusSize = getErasmus().size();
+            for (int i = 0; i < erasmusSize; i++) {
+                if (getErasmus().getFirst().getNativeLanguage().equals(language))
+                    getErasmusToDivide().add(getErasmus().removeFirst());
+                else
+                    getErasmus().addLast(getErasmus().removeFirst());
+            }
+            int mentorSize = getMentors().size();
+            for (int i = 0; i < mentorSize; i++) {
+                if (getMentors().getFirst().getLanguage().equals(language))
+                    getMentorsToDivade().add(getMentors().removeFirst());
+                else
+                    getMentors().addLast(getMentors().removeFirst());
+            }
+            tempWynik = Divide();
+            this.wynik.putAll(tempWynik);
+            getMentorsToDivade().clear();
         }
+        System.out.println();
+        System.out.println("Osoby nieprzydzielone: ");
+        for(int k=0;k<erasmusLeft.size();k++)
+            System.out.println(erasmusLeft);
 
     }
 
     private HashMap Divide(){
-        HashMap<Mentor, LinkedList<Erasmus>> wynik = new HashMap<>();
-        int mean = getErasmus().size() / getMentors().size();
-        for (int i = 0; i < getMentors().size(); i++) {
+        HashMap<Mentor, LinkedList<Erasmus>> tempWynik = new HashMap<>();
+        int mean = getErasmusToDivide().size() / (getMentorsToDivade().size());
+        for (int i = 0; i < getMentorsToDivade().size(); i++) {
             LinkedList<Erasmus> eList = new LinkedList<>();
-            Mentor m = getMentors().get(i);
+            Mentor m = getMentorsToDivade().get(i);
             for (int j = 0; j < mean && j < m.getNumberOfErasmus(); j++) {
-                Erasmus e = getErasmus().get(0);
-                if (e.getNativeLanguage().equals(m.getLanguage())){
+                Erasmus e = getErasmusToDivide().removeFirst();
                     eList.add(e);
-                    getErasmus().remove(0);
-                } else {
-                    j--;
-                    getErasmus().remove(0);
-                    getErasmus().add(e);
-                }
             }
-            wynik.put(m, eList);
-        }
-        if (getErasmus().size() > 0){
-            for (int i = 0; i < getErasmusToDivide().size(); i++){
-                int j = 0;
-                Erasmus e = getErasmusToDivide().get(0);
-                boolean isAdded = false;
-                do {
-                    Mentor m = getMentors().get(j);
-                    if (e.getNativeLanguage().equals(m.getLanguage())){
-                        LinkedList<Erasmus> tempList = wynik.get(m);
-                        tempList.add(e);
-                        wynik.replace(m, tempList);
-                        getErasmus().remove(e);
-                        isAdded = true;
-                    }
-                    j++;
-                } while (isAdded == false);
+            if (eList.size() > 0) {
+                tempWynik.put(m, eList);
             }
         }
-        return wynik;
-    }
+        while(getErasmusToDivide().size() > 0) {
+            Erasmus e = getErasmusToDivide().removeFirst();
+            Mentor m = getMentorsToDivade().removeFirst();
+            if (m.getNumberOfErasmus() > tempWynik.get(m).size()) {
+                LinkedList<Erasmus> tempList = tempWynik.get(m);
+                tempList.add(e);
+                tempWynik.replace(m, tempList);
+                getMentorsToDivade().add(m);
+            } else {
+                getErasmusToDivide().addFirst(e);
+            }
+            if (getMentorsToDivade().size() == 0) {
+                setErasmusLeft(getErasmusToDivide());
+                getErasmusToDivide().clear();
+            }
+        }
 
-    public int getNoErasmus() {
-        return noErasmus;
-    }
-
-    public int getMaxErasmus() {
-        return maxErasmus;
+        return tempWynik;
     }
 
     public LinkedList<Erasmus> getErasmus() {
         return erasmus;
     }
 
+    public LinkedList<Erasmus> getErasmusToDivide() {
+        return erasmusToDivide;
+    }
+
+    public LinkedList<Erasmus> getErasmusLeft() {
+        return erasmusLeft;
+    }
+
     public LinkedList<Mentor> getMentors() {
         return mentors;
+    }
+
+    public LinkedList<Mentor> getMentorsToDivade() {
+        return mentorsToDivade;
     }
 
     public HashMap<Mentor, LinkedList<Erasmus>> getWynik() {
         return wynik;
     }
 
-    public LinkedList<Erasmus> getErasmusToDivide() {
-        return erasmusToDivide;
+    public void setErasmusLeft(LinkedList<Erasmus> erasmusLeft) {
+        this.erasmusLeft = erasmusLeft;
     }
 }
