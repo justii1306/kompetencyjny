@@ -105,12 +105,18 @@ public class Main {
 
         Sort sort = new Sort(noErasmus, maxErasmus, erasmus, mentors);
         for (Mentor key : sort.getWynik().keySet()) {
-            System.out.print(key.getName() + " " + key.getSurname() + "(" + key.getLanguage() + ")" + ": ");
+            System.out.print(key.getName() + " " + key.getSurname() + "(" + key.getLanguage() + ", " + key.getId() + ")" + ": ");
             for (int i = 0; i < sort.getWynik().get(key).size(); i++){
                 System.out.print(sort.getWynik().get(key).get(i).getName() + " " +
-                        sort.getWynik().get(key).get(i).getSurname() + "(" + key.getLanguage() + ")" + ", ");
+                        sort.getWynik().get(key).get(i).getSurname() + "(" + key.getId() + ")" + ", ");
             }
             System.out.println();
         }
+        System.out.println("Osoby nieprzydzielone: ");
+        for(int k=0;k<sort.getErasmusLeft().size();k++)
+            System.out.println(sort.getErasmusLeft().get(k).getName() + " " +
+            sort.getErasmusLeft().get(k).getSurname() + "(" +
+            sort.getErasmusLeft().get(k).getNativeLanguage() + ", " +
+            sort.getErasmusLeft().get(k).getId() + ")");
     }
 }

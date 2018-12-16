@@ -5,8 +5,6 @@ import java.util.NoSuchElementException;
 
 public class Sort {
 
-    //private final int noErasmus;
-    //private final int maxErasmus;
     private LinkedList<Erasmus> erasmus;
     private LinkedList<Erasmus> erasmusToDivide;
     private LinkedList<Erasmus> erasmusLeft;
@@ -19,6 +17,7 @@ public class Sort {
         this.mentors = mentors;
         this.erasmusToDivide = new LinkedList<>();
         this.mentorsToDivade = new LinkedList<>();
+        this.erasmusLeft = new LinkedList<>();
         this.wynik = new HashMap<>();
         HashMap<Mentor, LinkedList<Erasmus>> tempWynik;
         while (getErasmus().size() > 0) {
@@ -43,15 +42,19 @@ public class Sort {
             getMentorsToDivade().clear();
         }
         System.out.println();
-        System.out.println("Osoby nieprzydzielone: ");
-        for(int k=0;k<erasmusLeft.size();k++)
-            System.out.println(erasmusLeft);
 
     }
 
     private HashMap Divide(){
         HashMap<Mentor, LinkedList<Erasmus>> tempWynik = new HashMap<>();
-        int mean = getErasmusToDivide().size() / (getMentorsToDivade().size());
+        int mean;
+        try {
+            mean = getErasmusToDivide().size() / (getMentorsToDivade().size());
+        } catch (ArithmeticException e){
+            getErasmusLeft().addAll(getErasmusToDivide());
+            getErasmusToDivide().clear();
+            return tempWynik;
+        }
         for (int i = 0; i < getMentorsToDivade().size(); i++) {
             LinkedList<Erasmus> eList = new LinkedList<>();
             Mentor m = getMentorsToDivade().get(i);
@@ -75,7 +78,7 @@ public class Sort {
                 getErasmusToDivide().addFirst(e);
             }
             if (getMentorsToDivade().size() == 0) {
-                setErasmusLeft(getErasmusToDivide());
+                getErasmusLeft().addAll(getErasmusToDivide());
                 getErasmusToDivide().clear();
             }
         }
