@@ -1,91 +1,114 @@
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+
+import java.util.*;
 
 public class Sort {
 
-    private final int noErasmus;
-    private final int maxErasmus;
-    private final LinkedList<Erasmus> erasmus;
-    private LinkedList<Erasmus> erasmusToDivide;
-    private LinkedList<Mentor> mentors;
-    private HashMap<Mentor, LinkedList<Erasmus>> wynik = new HashMap<>();
+    private ArrayList<Erasmus> erasmus;
+    private ArrayList<Erasmus> erasmusToDivide;
+    private ArrayList<Erasmus> erasmusLeft;
+    private ArrayList<Mentor> mentors;
+    private ArrayList<Mentor> mentorsToDivade;
+    private HashMap<Mentor, ArrayList<Erasmus>> wynik;
 
-    public Sort(int noErasmus, int maxErasmus, LinkedList erasmus, LinkedList mentors) {
-        this.noErasmus = noErasmus;
-        this.maxErasmus = maxErasmus;
+    public Sort(int noErasmus, int maxErasmus, ArrayList erasmus, ArrayList mentors) {
         this.erasmus = erasmus;
-        this.erasmusToDivide = erasmus;
         this.mentors = mentors;
-
-        if (maxErasmus >= noErasmus){
-            this.wynik = Divide();
-            System.out.println();
+        this.erasmusToDivide = new ArrayList<>();
+        this.mentorsToDivade = new ArrayList<>();
+        this.erasmusLeft = new ArrayList<>();
+        this.wynik = new HashMap<>();
+        HashMap<Mentor, ArrayList<Erasmus>> tempWynik;
+        while (getErasmus().size() > 0) {
+            getErasmusToDivide().add(getErasmus().remove(0));
+            String language = getErasmusToDivide().get(0).getNativeLanguage();
+            int erasmusSize = getErasmus().size();
+            for (int i = 0; i < erasmusSize; i++) {
+                if (getErasmus().get(0).getNativeLanguage().equals(language))
+                    getErasmusToDivide().add(getErasmus().remove(0));
+                else
+                    getErasmus().add(getErasmus().remove(0));
+            }
+            int mentorSize = getMentors().size();
+            for (int i = 0; i < mentorSize; i++) {
+                if (getMentors().get(0).getLanguage().equals(language))
+                    getMentorsToDivade().add(getMentors().remove(0));
+                else
+                    getMentors().add(getMentors().remove(0));
+            }
+            tempWynik = Divide();
+            this.wynik.putAll(tempWynik);
+            getMentorsToDivade().clear();
         }
+        System.out.println();
 
     }
 
     private HashMap Divide(){
-        HashMap<Mentor, LinkedList<Erasmus>> wynik = new HashMap<>();
-        int mean = getErasmus().size() / getMentors().size();
-        for (int i = 0; i < getMentors().size(); i++) {
-            LinkedList<Erasmus> eList = new LinkedList<>();
-            Mentor m = getMentors().get(i);
+        HashMap<Mentor, ArrayList<Erasmus>> tempWynik = new HashMap<>();
+        int mean;
+        try {
+            mean = getErasmusToDivide().size() / (getMentorsToDivade().size());
+        } catch (ArithmeticException e){
+            getErasmusLeft().addAll(getErasmusToDivide());
+            getErasmusToDivide().clear();
+            return tempWynik;
+        }
+        for (int i = 0; i < getMentorsToDivade().size(); i++) {
+            ArrayList<Erasmus> eList = new ArrayList<>();
+            Mentor m = getMentorsToDivade().get(i);
             for (int j = 0; j < mean && j < m.getNumberOfErasmus(); j++) {
-                Erasmus e = getErasmus().get(0);
-                if (e.getNativeLanguage().equals(m.getLanguage())){
+                Erasmus e = getErasmusToDivide().remove(0);
                     eList.add(e);
-                    getErasmus().remove(0);
-                } else {
-                    j--;
-                    getErasmus().remove(0);
-                    getErasmus().add(e);
-                }
             }
-            wynik.put(m, eList);
-        }
-        if (getErasmus().size() > 0){
-            for (int i = 0; i < getErasmusToDivide().size(); i++){
-                int j = 0;
-                Erasmus e = getErasmusToDivide().get(0);
-                boolean isAdded = false;
-                do {
-                    Mentor m = getMentors().get(j);
-                    if (e.getNativeLanguage().equals(m.getLanguage())){
-                        LinkedList<Erasmus> tempList = wynik.get(m);
-                        tempList.add(e);
-                        wynik.replace(m, tempList);
-                        getErasmus().remove(e);
-                        isAdded = true;
-                    }
-                    j++;
-                } while (isAdded == false);
+            if (eList.size() > 0) {
+                tempWynik.put(m, eList);
             }
         }
-        return wynik;
+        while(getErasmusToDivide().size() > 0) {
+            Erasmus e = getErasmusToDivide().remove(0);
+            Mentor m = getMentorsToDivade().remove(0);
+            if (m.getNumberOfErasmus() > tempWynik.get(m).size()) {
+                ArrayList<Erasmus> tempList = tempWynik.get(m);
+                tempList.add(e);
+                tempWynik.replace(m, tempList);
+                getMentorsToDivade().add(m);
+            } else {
+                getErasmusToDivide().add(0, e);
+            }
+            if (getMentorsToDivade().size() == 0) {
+                getErasmusLeft().addAll(getErasmusToDivide());
+                getErasmusToDivide().clear();
+            }
+        }
+
+        return tempWynik;
     }
 
-    public int getNoErasmus() {
-        return noErasmus;
-    }
-
-    public int getMaxErasmus() {
-        return maxErasmus;
-    }
-
-    public LinkedList<Erasmus> getErasmus() {
+    public ArrayList<Erasmus> getErasmus() {
         return erasmus;
     }
 
-    public LinkedList<Mentor> getMentors() {
+    public ArrayList<Erasmus> getErasmusToDivide() {
+        return erasmusToDivide;
+    }
+
+    public ArrayList<Erasmus> getErasmusLeft() {
+        return erasmusLeft;
+    }
+
+    public ArrayList<Mentor> getMentors() {
         return mentors;
     }
 
-    public HashMap<Mentor, LinkedList<Erasmus>> getWynik() {
+    public ArrayList<Mentor> getMentorsToDivade() {
+        return mentorsToDivade;
+    }
+
+    public HashMap<Mentor, ArrayList<Erasmus>> getWynik() {
         return wynik;
     }
 
-    public LinkedList<Erasmus> getErasmusToDivide() {
-        return erasmusToDivide;
+    public void setErasmusLeft(ArrayList<Erasmus> erasmusLeft) {
+        this.erasmusLeft = erasmusLeft;
     }
 }

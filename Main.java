@@ -3,16 +3,17 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
 public class Main {
     public static void main(String[] args){
-        final String connectionUrl="jdbc:sqlserver://localhost:1433;databaseName=ERASMUS;user=root;password=root";
+        final String connectionUrl="jdbc:sqlserver://127.0.0.1:1433;databaseName=ERASMUS;user=root;password=root";
         int noErasmus=0;
         int maxErasmus=0;
-        LinkedList<Erasmus> erasmus = new LinkedList<>();
-        LinkedList<Mentor> mentors = new LinkedList<>();
+        ArrayList<Erasmus> erasmus = new ArrayList<>();
+        ArrayList<Mentor> mentors = new ArrayList<>();
 
 
         try (Connection con = DriverManager.getConnection(connectionUrl); Statement stmt = con.createStatement();) {
@@ -104,13 +105,20 @@ public class Main {
         }
 
         Sort sort = new Sort(noErasmus, maxErasmus, erasmus, mentors);
+        System.out.println("Wyniki podzału: ");
         for (Mentor key : sort.getWynik().keySet()) {
-            System.out.print(key.getName() + " " + key.getSurname() + "(" + key.getLanguage() + ")" + ": ");
+            System.out.print(key.getName() + " " + key.getSurname() + "(" + key.getLanguage() + ", " + key.getId() + ")" + ": ");
             for (int i = 0; i < sort.getWynik().get(key).size(); i++){
                 System.out.print(sort.getWynik().get(key).get(i).getName() + " " +
-                        sort.getWynik().get(key).get(i).getSurname() + "(" + key.getLanguage() + ")" + ", ");
+                        sort.getWynik().get(key).get(i).getSurname() + "(" + key.getId() + ")" + ", ");
             }
             System.out.println();
         }
+        System.out.println("Osoby nieprzydzielone: ");
+        for(int k=0;k<sort.getErasmusLeft().size();k++)
+            System.out.println(sort.getErasmusLeft().get(k).getName() + " " +
+            sort.getErasmusLeft().get(k).getSurname() + "(" +
+            sort.getErasmusLeft().get(k).getNativeLanguage() + ", " +
+            sort.getErasmusLeft().get(k).getId() + ")");
     }
 }
